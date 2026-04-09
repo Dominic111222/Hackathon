@@ -26,20 +26,38 @@ function App() {
   };
 
   const handleSave = () => {
+  const selectedQuestions = [];
+
   for (let i = 0; i < formData.length; i++) {
     const row = formData[i];
     const rowNum = i + 1;
 
+    // 1️⃣ Question required
     if (!row.questionId) {
       alert(`Please select a question for Row ${rowNum}`);
       return;
     }
 
+    // 5️⃣ Duplicate question check
+    if (selectedQuestions.includes(row.questionId)) {
+      alert(`Duplicate question selected at Row ${rowNum}`);
+      return;
+    }
+    selectedQuestions.push(row.questionId);
+
+    // 2️⃣ Min length
     if (!row.answer || row.answer.length < 5) {
       alert(`Answer ${rowNum} must be at least 5 characters long.`);
       return;
     }
 
+    // 3️⃣ Max length
+    if (row.answer.length > 255) {
+      alert(`Answer ${rowNum} cannot exceed 255 characters.`);
+      return;
+    }
+
+    // 4️⃣ Match check
     if (row.answer !== row.confirmAnswer) {
       alert(`Row ${rowNum} Error: Answer and Confirm Answer do not match!`);
       return;
@@ -49,7 +67,7 @@ function App() {
   fetch('http://localhost:5000/api/save', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-   body: JSON.stringify({ answers: formData })
+    body: JSON.stringify({ answers: formData })
   })
     .then(async res => {
       const data = await res.json();

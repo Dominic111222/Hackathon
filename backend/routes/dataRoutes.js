@@ -20,27 +20,41 @@ router.post("/save", (req, res) => {
     return res.status(400).json({ message: "Invalid payload" });
   }
 
+  const usedQuestions = [];
+
   for (let i = 0; i < answers.length; i++) {
     const a = answers[i];
 
-    if (!a.answer || a.answer.length < 5) {
-      return res.status(400).json({
-        message: "Answer too short"
-      });
+    
+    if (!a.questionId) {
+      return res.status(400).json({ message: `Question required at row ${i + 1}` });
     }
 
+    
+    if (usedQuestions.includes(a.questionId)) {
+      return res.status(400).json({ message: "Duplicate question selected" });
+    }
+    usedQuestions.push(a.questionId);
+
+    
+    if (!a.answer || a.answer.length < 5) {
+      return res.status(400).json({ message: "Answer too short" });
+    }
+
+   
+    if (a.answer.length > 255) {
+      return res.status(400).json({ message: "Answer too long" });
+    }
+
+    
     if (a.answer !== a.confirmAnswer) {
-      return res.status(400).json({
-        message: "Answer mismatch"
-      });
+      return res.status(400).json({ message: "Answer mismatch" });
     }
   }
 
   savedData.push(answers);
 
-  return res.status(200).json({
-    message: "Saved successfully"
-  });
+  return res.status(200).json({ message: "Saved successfully" });
 });
 
 module.exports = router;
